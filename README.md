@@ -18,6 +18,10 @@ that job to sometime in the future without having to test the service.
 
 ### Usage
 
+Install it:
+
+    gem install redis_feature_control
+
 First configure it:
 
     require 'rubygems'

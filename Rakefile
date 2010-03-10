@@ -45,6 +45,6 @@ task :publish => [ :test, :gemspec, :build ] do
   system "git tag v#{Redis::FeatureControl::Version}"
   system "git push origin v#{Redis::FeatureControl::Version}"
   system "git push origin master"
-  system "gem push pkg/redis_featur_control-#{Redis::FeatureControl::Version}.gem"
+  system "gem push pkg/redis_feature_control-#{Redis::FeatureControl::Version}.gem"
   system "git clean -fd"
 end
