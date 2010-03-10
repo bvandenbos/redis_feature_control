@@ -20,7 +20,8 @@ that job to sometime in the future without having to test the service.
 
 First configure it:
 
-    require 'redis_feature_control'
+    require 'rubygems'
+    require 'redis/feature_control'
     Redis::FeatureControl.connection_string = "redis_server:6379"
 
 Then add your features/services to it:
