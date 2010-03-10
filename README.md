@@ -9,7 +9,7 @@ so jobs can take appropriate action.
 
 Sometimes you depend on services.  Sometimes these services go down.  Sometimes
 you want to explicitly turn off services and have your app know the service is
-turned off or down.  That way your app can display a pretty message to a user
+turned off.  That way your app can display a pretty message to a user
 rather than trying a service and waiting for it to time out.  Maybe your backend
 job depends on a service.  When it notices it's disabled, it can sleep or delay
 that job to sometime in the future without having to test the service.
