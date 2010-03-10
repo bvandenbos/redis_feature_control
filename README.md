@@ -22,7 +22,7 @@ Install it:
 
     gem install redis_feature_control
 
-First configure it:
+Configure it:
 
     require 'rubygems'
     require 'redis/feature_control'
