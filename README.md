@@ -42,13 +42,13 @@ Then see if they are enabled and toggle them:
     # disabling...
     Redis::FeatureControl.disable!(:cc_gateway)
     Redis::FeatureControl.enabled?(:cc_gateway) # => false
-    Redis::FeatureControl.status(:cc_gateway) # => "disabled"
+    Redis::FeatureControl.state(:cc_gateway) # => "disabled"
 
     # enabling...
     Redis::FeatureControl.enable!(:cc_gateway)
     Redis::FeatureControl.enabled?(:cc_gateway) # => true
     Redis::FeatureControl.disabled?(:cc_gateway) # => false
-    Redis::FeatureControl.status(:cc_gateway) # => "enabled"
+    Redis::FeatureControl.state(:cc_gateway) # => "enabled"
 
 ### Mocking for Test/Development
 
