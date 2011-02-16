@@ -16,8 +16,6 @@ class Redis
 
   module FeatureControl
 
-    Version = '0.0.1'
-
     class Redis::FeatureControl::UnknownFeatureError < RuntimeError; end;
 
     class << self
@@ -40,6 +38,11 @@ class Redis
       def connection_string=(value)
         @host, @port = value.split(":", 2)
         redis_connect!
+      end
+      
+      # Set the redis instance directly.
+      def connection=(redis)
+        @redis = redis
       end
 
       # Connects to redis on the current host/port and sets the redis object

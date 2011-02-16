@@ -26,7 +26,11 @@ end
 at_exit do
   next if $!
 
-  exit_code = Test::Unit::AutoRunner.run
+  if defined?(MiniTest)
+    exit_code = MiniTest::Unit.new.run(ARGV)
+  else
+    exit_code = Test::Unit::AutoRunner.run
+  end
 
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."

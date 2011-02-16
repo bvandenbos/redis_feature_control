@@ -1,0 +1,24 @@
+PATH
+  remote: .
+  specs:
+    redis_feature_control (0.0.2)
+      redis (>= 0.1.1)
+      redis-namespace (>= 0.2.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    mocha (0.9.12)
+    redis (2.1.1)
+    redis-namespace (0.10.0)
+      redis (< 3.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (>= 1.0.0)
+  mocha
+  redis (>= 0.1.1)
+  redis-namespace (>= 0.2.0)
+  redis_feature_control!

@@ -3,115 +3,128 @@ require File.dirname(__FILE__) + '/test_helper'
 class Redis::FeatureControlTest < Test::Unit::TestCase
 
   def setup
-    Redis::FeatureControl.connection_string = 'localhost:9736'
-    Redis::FeatureControl.unmock!
-    Redis::FeatureControl.features = [:enabled_feature]
-    Redis::FeatureControl.redis.flushall
+    control.connection_string = 'localhost:9736'
+    control.unmock!
+    control.features = [:enabled_feature]
+    control.redis.flushall
   end
 
   def test_connection_string_works
-    Redis::FeatureControl.connection_string = "redis:1234"
-    assert_equal('redis', Redis::FeatureControl.host)
-    assert_equal('1234', Redis::FeatureControl.port)
+    control.connection_string = "redis:1234"
+    assert_equal('redis', control.host)
+    assert_equal('1234', control.port)
+  end
+
+  def test_connection_works
+    redis = Redis.new(:host => 'localhost', :port => 9736, :thread_safe => true)
+    redis_namespace = Redis::Namespace.new(:feature_control_test, :redis => redis)
+    control.connection = redis_namespace
+    control.features = [:some_feature]
+    control.enable!(:some_feature)
+    assert redis.exists('feature_control_test:some_feature')
   end
 
   def test_redis
-    assert(Redis::FeatureControl.redis.is_a?(Redis::Namespace))
+    assert(control.redis.is_a?(Redis::Namespace))
   end
 
   def test_unknown_features_raise_errors
-    assert_raises(Redis::FeatureControl::UnknownFeatureError) do
-      Redis::FeatureControl.enabled?(:some_feature)
+    assert_raises(control::UnknownFeatureError) do
+      control.enabled?(:some_feature)
     end
   end
 
   def test_enable_disable
-    Redis::FeatureControl.features << :cool_service # add a feature
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should be enabled by default
-    assert(!Redis::FeatureControl.disabled?(:cool_service)) # should be enabled by default
+    control.features << :cool_service # add a feature
+    assert(control.enabled?(:cool_service)) # should be enabled by default
+    assert(!control.disabled?(:cool_service)) # should be enabled by default
 
-    Redis::FeatureControl.enable!(:cool_service)
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
+    control.enable!(:cool_service)
+    assert(control.enabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.disable!(:cool_service)
-    assert(!Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
-    assert(Redis::FeatureControl.disabled?(:cool_service)) # should still be enabled
+    control.disable!(:cool_service)
+    assert(!control.enabled?(:cool_service)) # should still be enabled
+    assert(control.disabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.enable!(:cool_service)
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
+    control.enable!(:cool_service)
+    assert(control.enabled?(:cool_service)) # should still be enabled
   end
 
   def test_set_status
+    control.features << :cool_service # add a feature
 
-    Redis::FeatureControl.features << :cool_service # add a feature
+    control.set_status(:cool_service, 0.9) # <1
+    assert(control.disabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.set_status(:cool_service, 0.9) # <1
-    assert(Redis::FeatureControl.disabled?(:cool_service)) # should still be enabled
+    control.set_status(:cool_service, 1.0)
+    assert(control.enabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.set_status(:cool_service, 1.0)
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
+    control.set_status(:cool_service, -1)
+    assert(control.disabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.set_status(:cool_service, -1)
-    assert(Redis::FeatureControl.disabled?(:cool_service)) # should still be enabled
+    control.set_status(:cool_service, -1.0)
+    assert(control.disabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.set_status(:cool_service, -1.0)
-    assert(Redis::FeatureControl.disabled?(:cool_service)) # should still be enabled
+    control.set_status(:cool_service, 42)
+    assert(control.enabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.set_status(:cool_service, 42)
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
-
-    Redis::FeatureControl.set_status(:cool_service, -42)
-    assert(Redis::FeatureControl.disabled?(:cool_service)) # should still be enabled
-
+    control.set_status(:cool_service, -42)
+    assert(control.disabled?(:cool_service)) # should still be enabled
   end
 
   def test_state_string
-    Redis::FeatureControl.features << :cool_service # add a feature
+    control.features << :cool_service # add a feature
 
-    Redis::FeatureControl.enable!(:cool_service)
-    assert_equal('enabled', Redis::FeatureControl.state(:cool_service))
+    control.enable!(:cool_service)
+    assert_equal('enabled', control.state(:cool_service))
 
-    Redis::FeatureControl.disable!(:cool_service)
-    assert_equal('disabled', Redis::FeatureControl.state(:cool_service))
+    control.disable!(:cool_service)
+    assert_equal('disabled', control.state(:cool_service))
   end
 
   def test_check_feature
-    assert_raises(Redis::FeatureControl::UnknownFeatureError) do
-      Redis::FeatureControl.enabled?(:some_feature)
+    assert_raises(control::UnknownFeatureError) do
+      control.enabled?(:some_feature)
     end
 
     assert_nothing_raised do
-      Redis::FeatureControl.enabled?(:enabled_feature)
+      control.enabled?(:enabled_feature)
     end
   end
 
   def test_mock
 
-    Redis::FeatureControl.mock!
-    assert(Redis::FeatureControl.mock?)
+    control.mock!
+    assert(control.mock?)
 
-    Redis::FeatureControl.unmock!
-    assert(!Redis::FeatureControl.mock?)
+    control.unmock!
+    assert(!control.mock?)
   end
 
   def test_mock_enable_disable
-    Redis::FeatureControl.mock!
+    control.mock!
 
-    Redis::FeatureControl.expects(:redis).never # It's mocked, so it shouldn't use redis
+    control.expects(:redis).never # It's mocked, so it shouldn't use redis
 
-    Redis::FeatureControl.features << :cool_service # add a feature
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should be enabled by default
-    assert(!Redis::FeatureControl.disabled?(:cool_service)) # should be enabled by default
+    control.features << :cool_service # add a feature
+    assert(control.enabled?(:cool_service)) # should be enabled by default
+    assert(!control.disabled?(:cool_service)) # should be enabled by default
 
-    Redis::FeatureControl.enable!(:cool_service)
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
+    control.enable!(:cool_service)
+    assert(control.enabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.disable!(:cool_service)
-    assert(!Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
-    assert(Redis::FeatureControl.disabled?(:cool_service)) # should still be enabled
+    control.disable!(:cool_service)
+    assert(!control.enabled?(:cool_service)) # should still be enabled
+    assert(control.disabled?(:cool_service)) # should still be enabled
 
-    Redis::FeatureControl.enable!(:cool_service)
-    assert(Redis::FeatureControl.enabled?(:cool_service)) # should still be enabled
+    control.enable!(:cool_service)
+    assert(control.enabled?(:cool_service)) # should still be enabled
+  end
+  
+  private
+  
+  def control
+    Redis::FeatureControl
   end
 
 end
