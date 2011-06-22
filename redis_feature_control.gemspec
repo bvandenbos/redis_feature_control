@@ -18,9 +18,10 @@ Gem::Specification.new do |s|
   s.executables  = `git ls-files`.split("\n").map{|f| f =~ /^bin\/(.*)/ ? $1 : nil}.compact
   s.require_path = 'lib'
   
-  s.add_runtime_dependency(%q<redis>, [">= 0.1.1"])
-  s.add_runtime_dependency(%q<redis-namespace>, [">= 0.2.0"])
-  s.add_development_dependency(%q<mocha>, [">= 0"])
+  s.add_runtime_dependency("redis", [">= 0.1.1"])
+  s.add_runtime_dependency("redis-namespace", [">= 0.2.0"])
+  s.add_development_dependency("mocha", [">= 0"])
+  s.add_development_dependency("rake", ["0.8.7"])
   
 end
 
