@@ -32,7 +32,7 @@ class Redis
         mock_feature_hash[feature.to_s].nil? || true == mock_feature_hash[feature.to_s]
       else
         feature_control_value = (redis.get(feature.to_s) || 1).to_f
-        user_value = (@dynamic_value.hex.to_i % 100) / 100.0
+        user_value = Digest::SHA1.hexdigest(@dynamic_value.to_s).to_i(16) % 1_000_000 / 1_000_000.0
         feature_control_value >= user_value
       end
     rescue Errno::ECONNREFUSED
