@@ -20,23 +20,24 @@ class Redis
 
     class Redis::FeatureControl::UnknownFeatureError < RuntimeError; end;
 
-    def_delegators self, :check_feature!, :mock?, :mock_feature_hash, :redis
+    def_delegators self, :check_feature!, :mock?, :mock_feature_hash, :redis, :get_value
 
     def initialize(dynamic_value)
       @dynamic_value = dynamic_value
     end
 
     def enabled?(feature)
-      check_feature!(feature)
-      if mock?
-        mock_feature_hash[feature.to_s].nil? || true == mock_feature_hash[feature.to_s]
-      else
-        feature_control_value = (redis.get(feature.to_s) || 1).to_f
-        user_value = Digest::SHA1.hexdigest(@dynamic_value.to_s).to_i(16) % 1_000_000 / 1_000_000.0
-        feature_control_value >= user_value
-      end
+      get_value(feature) >= user_value unless feature_control_value == 0.0
     rescue Errno::ECONNREFUSED
       true # default to enabled if we can't connect to redis
+    end
+
+    def user_value
+      if defined? @dynamic_value
+        Digest::SHA1.hexdigest(@dynamic_value.to_s).to_i(16) % 1_000_000 / 1_000_000.0
+      else
+        1
+      end
     end
 
     class << self
@@ -82,44 +83,48 @@ class Redis
         @redis
       end
 
-      def disabled?(feature)
+      def get_value(feature)
         check_feature!(feature)
+        feature_value = mock? ? mock_feature_hash[feature.to_s] : redis.get(feature.to_s)
+        (feature_value || 1).to_f
+      end
+
+      def set_value!(feature, value)
+        check_feature!(feature)
+
+        value = 0 if value < 0
+        value = 1 if value > 1
+
+        if mock?
+          mock_feature_hash[feature.to_s] = value
+        else
+          redis.set(feature.to_s, value)
+        end
+      rescue Errno::ECONNREFUSED
+        # Ignore
+      end
+
+      def disabled?(feature)
         !enabled?(feature)
       end
 
       def enabled?(feature)
-        check_feature!(feature)
-        if mock?
-          mock_feature_hash[feature.to_s].nil? || true == mock_feature_hash[feature.to_s]
-        else
-          (redis.get(feature.to_s) || 1).to_i == 1
-        end
+        get_value(feature.to_s) == 1
       rescue Errno::ECONNREFUSED
         true # default to enabled if we can't connect to redis
       end
 
       def enable!(feature)
-        check_feature!(feature)
-        if mock?
-          mock_feature_hash[feature.to_s] = true
-        else
-          redis.set(feature.to_s, 1)
-        end
-      rescue Errno::ECONNREFUSED
-        # Ignore
+        set_value!(feature, 1)
       end
 
       def disable!(feature)
-        check_feature!(feature)
-        if mock?
-          mock_feature_hash[feature.to_s] = false
-        else
-          redis.set(feature.to_s, 0)
-        end
+        set_value!(feature.to_s, 0)
       rescue Errno::ECONNREFUSED
         # Ignore
       end
 
+      # Backwards compatibility
       # value >=1 enable the feature
       # value <1 disable the feature
       def set_status(feature, value)
