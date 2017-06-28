@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'redis'
 require 'redis/namespace'
+require 'forwardable'
 
 #
 # Redis::FeatureControl
@@ -17,6 +18,25 @@ class Redis
   module FeatureControl
 
     class Redis::FeatureControl::UnknownFeatureError < RuntimeError; end;
+
+    def_delegators :class, :check_feature?, :mock?, :mock_feature_hash, :redis
+
+    def initialize(dynamic_value)
+      @dynamic_value = dynamic_value
+    end
+
+    def enabled?(feature)
+      check_feature!(feature)
+      if mock?
+        mock_feature_hash[feature.to_s].nil? || true == mock_feature_hash[feature.to_s]
+      else
+        feature_control_value = (redis.get(feature.to_s) || 1).to_f
+        user_value = (@dynamic_value.hex.to_i % 100) / 100.0
+        feature_control_value >= user_value
+      end
+    rescue Errno::ECONNREFUSED
+      true # default to enabled if we can't connect to redis
+    end
 
     class << self
 
