@@ -27,7 +27,8 @@ class Redis
     end
 
     def enabled?(feature)
-      get_value(feature) >= user_value unless feature_control_value == 0.0
+      feature_control_value = get_value(feature)
+      feature_control_value >= user_value unless feature_control_value == 0.0
     rescue Errno::ECONNREFUSED
       true # default to enabled if we can't connect to redis
     end
