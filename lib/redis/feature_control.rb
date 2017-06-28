@@ -15,7 +15,8 @@ require 'forwardable'
 #
 class Redis
 
-  module FeatureControl
+  class FeatureControl
+    extend Forwardable
 
     class Redis::FeatureControl::UnknownFeatureError < RuntimeError; end;
 

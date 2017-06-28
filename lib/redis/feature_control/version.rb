@@ -1,5 +1,5 @@
 class Redis
-  module FeatureControl
+  class FeatureControl
     Version = '0.0.2'
   end
 end
