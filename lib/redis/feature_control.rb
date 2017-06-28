@@ -20,7 +20,7 @@ class Redis
 
     class Redis::FeatureControl::UnknownFeatureError < RuntimeError; end;
 
-    def_delegators :class, :check_feature?, :mock?, :mock_feature_hash, :redis
+    def_delegators self, :check_feature!, :mock?, :mock_feature_hash, :redis
 
     def initialize(dynamic_value)
       @dynamic_value = dynamic_value
