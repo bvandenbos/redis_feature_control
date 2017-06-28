@@ -91,6 +91,7 @@ class Redis
       end
 
       def set_value!(feature, value)
+        value = value.to_f
         check_feature!(feature)
 
         value = 0 if value < 0
