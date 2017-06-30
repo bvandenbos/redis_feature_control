@@ -21,7 +21,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("redis", [">= 0.1.1"])
   s.add_runtime_dependency("redis-namespace", [">= 0.2.0"])
   s.add_development_dependency("mocha", [">= 0"])
-  s.add_development_dependency("rake", ["0.8.7"])
+  s.add_development_dependency("rake")
+  s.add_development_dependency("test-unit")
   
 end
 
