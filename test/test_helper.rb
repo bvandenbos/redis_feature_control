@@ -1,8 +1,8 @@
 dir = File.dirname(File.expand_path(__FILE__))
 
 require 'rubygems'
-require 'test/unit'
-require 'mocha'
+require 'test-unit'
+require 'mocha/test_unit'
 require 'redis'
 $LOAD_PATH.unshift File.dirname(File.expand_path(__FILE__)) + '/../lib'
 require 'redis/feature_control'

@@ -1,18 +1,23 @@
 PATH
   remote: .
   specs:
-    redis_feature_control (0.0.2)
+    redis_feature_control (0.1.0)
       redis (>= 0.1.1)
       redis-namespace (>= 0.2.0)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    mocha (0.9.12)
-    rake (0.8.7)
-    redis (2.1.1)
-    redis-namespace (0.10.0)
-      redis (< 3.0.0)
+    metaclass (0.0.4)
+    mocha (1.2.1)
+      metaclass (~> 0.0.1)
+    power_assert (0.2.6)
+    rake (12.0.0)
+    redis (3.3.3)
+    redis-namespace (1.5.3)
+      redis (~> 3.0, >= 3.0.4)
+    test-unit (3.1.5)
+      power_assert
 
 PLATFORMS
   ruby
@@ -20,5 +25,9 @@ PLATFORMS
 DEPENDENCIES
   bundler (>= 1.0.0)
   mocha
-  rake (= 0.8.7)
+  rake
   redis_feature_control!
+  test-unit
+
+BUNDLED WITH
+   1.14.3
